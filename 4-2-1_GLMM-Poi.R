@@ -1,3 +1,5 @@
+Sys.setenv(LANGUAGE="en")
+
 data.fn <- function(n = 40, alpha = 3.5576, beta1 = -0.0912, beta2 = 0.0091, beta3 = -0.00014, sd = 1) {
   year <- 1:n
   eps <- rnorm(n = n, mean = 0, sd = sd)
@@ -11,4 +13,18 @@ data.fn <- function(n = 40, alpha = 3.5576, beta1 = -0.0912, beta2 = 0.0091, bet
 
 data <- data.fn()
 
+library(lme4)
+yr <- factor(data$year)
+glmm.fit <- glmer(C ~ (1|yr) + year + I(year^2) + I(year^3), family = poisson, data = data)
+
+mny <- mean(data$year)
+sdy <- sd(data$year)
+cov1 <- (data$year - mny) / sdy
+cov2 <- cov1 * cov1
+cov3 <- cov1 * cov1 * cov1
+glmm.fit <- glmer(C ~ (1|yr) + cov1 + cov2 + cov3, family = poisson, data = data)
+summary(glm.fit)
+
+R.predictions <- exp(fixef(glmm.fit)[1] + fixef(glmm.fit)[2]*cov1 + fixef(glmm.fit)[3]*cov2 + fixef(glmm.fit)[4]*cov3 + unlist(ranef(glmm.fit)))
+lines(data$year, R.predictions, col = "green", lwd = 2, type = "l")
 
