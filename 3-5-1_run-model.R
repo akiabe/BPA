@@ -50,8 +50,6 @@ data
 library(rstan)
 rstan_options(auto_write=TRUE)
 options(mc.cores=parallel::detectCores())
-set.seed(123)
-
 
 stan_data <- list(
   C=data$C,
@@ -67,4 +65,33 @@ out <- stan(
 )
 
 print(out)
+
+mcmc_sample <- rstan::extract(out)
+
+prob_name <- "p"
+quantile(
+  mcmc_sample[[prob_name]][,1], 
+  probs=c(0.025, 0.5, 0.975)
+)
+
+result_df <- data.frame(t(apply(
+  X=mcmc_sample[[prob_name]],
+  MARGIN=2,
+  FUN=quantile,
+  probs=c(0.025, 0.5, 0.975)
+)))
+
+colnames(result_df) <- c("lwr", "fit", "upr")
+result_df$Year <- data$year
+result_df$C <- data$C
+result_df$N <- data$N
+
+head(result_df, n=3)
+
+library(ggplot2)
+ggplot(data=result_df, aes(x=Year, y=C/N)) +
+  geom_point(alpha=0.6, size=0.9) +
+  geom_line(aes(y=fit), size=0.9) +
+  geom_ribbon(aes(ymin=lwr, ymax=upr), alpha=0.3) +
+  ylab("%Successful pairs")
 
