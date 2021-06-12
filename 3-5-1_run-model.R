@@ -33,8 +33,8 @@ data
 plot_df <- data.frame(year=data$year, C=data$C, N=data$N) 
 ggplot(data=plot_df, aes(x=year, y=C/N)) +
   geom_point(alpha=0.6, size=0.9) +
-  ylab("%Successful pairs")
-
+  ylab("%Successful pairs") +
+  scale_y_continuous(limits=c(0, 1))
 
 library(rstan)
 rstan_options(auto_write=TRUE)
@@ -81,5 +81,6 @@ ggplot(data=result_df, aes(x=Year, y=C/N)) +
   geom_point(alpha=0.6, size=0.9) +
   geom_line(aes(y=fit), size=0.9) +
   geom_ribbon(aes(ymin=lwr, ymax=upr), alpha=0.3) +
-  ylab("%Successful pairs")
+  ylab("%Successful pairs") +
+  scale_y_continuous(limits=c(0, 1))
 
