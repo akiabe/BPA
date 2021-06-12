@@ -1,3 +1,5 @@
+library(ggplot2)
+
 data.fn <- function(
   nyears=40,
   alpha=0,
@@ -9,25 +11,6 @@ data.fn <- function(
   N <- round(runif(nyears, min=20, max=100))
   exp.p <- plogis(alpha + beta1*YR + beta2*(YR^2))
   C <- rbinom(n=nyears, size=N, prob=exp.p)
-  
-  plot(
-    year, 
-    C/N, 
-    type="b", 
-    ylab="%Successful Pairs", 
-    xlab="Year", 
-    lwd=2,
-    col="black",
-    ylim=c(0,1)
-  )
-  
-  points(
-    year, 
-    exp.p, 
-    type="l", 
-    lwd=2,
-    col="red"
-  )
   
   return(
     list(
@@ -46,6 +29,12 @@ data.fn <- function(
 
 data <- data.fn(nyears=40, alpha=1, beta1=-0.03, beta2=-0.9)
 data
+
+plot_df <- data.frame(year=data$year, C=data$C, N=data$N) 
+ggplot(data=plot_df, aes(x=year, y=C/N)) +
+  geom_point(alpha=0.6, size=0.9) +
+  ylab("%Successful pairs")
+
 
 library(rstan)
 rstan_options(auto_write=TRUE)
@@ -88,7 +77,6 @@ result_df$N <- data$N
 
 head(result_df, n=3)
 
-library(ggplot2)
 ggplot(data=result_df, aes(x=Year, y=C/N)) +
   geom_point(alpha=0.6, size=0.9) +
   geom_line(aes(y=fit), size=0.9) +
