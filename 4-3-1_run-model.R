@@ -57,20 +57,34 @@ library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
-mean_year <- mean(d$year)
-sd_year <- sd(d$year)
-scl_year <- (d$year-mean_year) / sd_year
-
 data <- list(
   nsite=ncol(d$C),
   nyear=nrow(d$C),
   C=d$C,
-  year=scl_year
+  year=(d$year-20)/20
 )
+
+inits <- function() {
+  list(mu=runif(1, 0, 2),
+       alpha=runif(d$nsite, -1, 1),
+       beta=runif(3, -1, 1),
+       sd.alpha=runif(1, 0, 0.1),
+       sd.year=runif(1, 0, 0.1))
+}
+
+ni <- 40000
+nt <- 10
+nb <- 30000
+nc <- 4
 
 fit <- stan(
   file="4-3-1_model.stan", 
   data=data,
+  init=inits,
+  chains=nc,
+  iter=ni,
+  warmup=nb,
+  thin=nt,
   seed=1
 )
 
