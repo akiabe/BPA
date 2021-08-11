@@ -15,7 +15,7 @@ transformed parameters {
   vector<lower=0>[T] N_est;
   N_est[1] = N_est1;
   for (i in 2:T) {
-    N_est[i] = N_est[i-1] * lambda[i];
+    N_est[i] = N_est[i-1] * lambda[i-1];
   }
 }
 
